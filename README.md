@@ -93,19 +93,6 @@ kubectl -n clickhouse get clickhouseinstallation sentry-clickhouse
 
 > **Примечание:** Если вы используете другой DNS для ClickHouse или другой namespace, отредактируйте `external_clickhouse` в `templatefile.tf` перед `terraform apply`.
 
-### 3. Доступ к Sentry
-
-- **URL**: http://sentry.apatsev.org.ru
-- **Email**: admin@sentry.local
-- **Password**: admin (задаётся в `templatefile.tf`, переменная `sentry_admin_password`)
-
-Убедитесь, что DNS-запись `sentry.apatsev.org.ru` указывает на внешний IP сервиса ingress-nginx:
-
-```bash
-kubectl -n ingress-nginx get svc
-```
-
-
 
 ## Тестирование issue #2166
 
@@ -119,9 +106,23 @@ Issue [#2166](https://github.com/sentry-kubernetes/charts/issues/2166): посл
 # Установка 30.4.0
 helm upgrade --install sentry sentry/sentry --version 30.4.0 -n sentry --wait \
   -f values_sentry-30.4.0.yaml --timeout=7200s --create-namespace
-
+```
 # Дождитесь готовности (30-40 мин), затем upgrade до 31.2.0
-helm upgrade sentry sentry/sentry --version 31.2.0 -n sentry --wait \
+
+### Доступ к Sentry
+
+- **URL**: http://sentry.apatsev.org.ru
+- **Email**: admin@sentry.local
+- **Password**: admin (задаётся в `templatefile.tf`, переменная `sentry_admin_password`)
+
+Убедитесь, что DNS-запись `sentry.apatsev.org.ru` указывает на внешний IP сервиса ingress-nginx:
+
+```bash
+kubectl -n ingress-nginx get svc
+```
+
+```bash
+helm upgrade до 31.2.0 sentry sentry/sentry --version 31.2.0 -n sentry --wait \
   -f values_sentry-31.2.0.yaml --timeout=7200s
 ```
 

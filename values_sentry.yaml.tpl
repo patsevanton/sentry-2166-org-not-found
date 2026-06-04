@@ -26,17 +26,3 @@ externalClickhouse:
   clusterName: "${external_clickhouse.clusterName}"
   distributedClusterName: "${external_clickhouse.distributedClusterName}"
   secure: ${external_clickhouse.secure}
-
-postgresql:
-  enabled: true
-
-redis:
-  enabled: true
-
-kafka:
-  enabled: true
-  kraft:
-    enabled: true
-  provisioning:
-    enabled: true
-    replicationFactor: 1
