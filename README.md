@@ -98,9 +98,6 @@ kubectl -n clickhouse get clickhouseinstallation sentry-clickhouse
 
 Issue [#2166](https://github.com/sentry-kubernetes/charts/issues/2166): после обновления Sentry Helm chart с `30.4.0` на `31.2.0` появляется ошибка **"The organization you were looking for was not found"**.
 
-### Воспроизведение
-
-Кластер уже развёрнут через Terraform (см. «Применение через Terraform» выше). Установка и upgrade выполняются вручную:
 
 # Установка 30.4.0
 ```bash
