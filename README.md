@@ -92,26 +92,6 @@ kubectl -n clickhouse get clickhouseinstallation sentry-clickhouse
 
 > **Примечание:** Если вы используете другой DNS для ClickHouse или другой namespace, отредактируйте `external_clickhouse` в `templatefile.tf` перед `terraform apply`.
 
-### 2. Установка Sentry
-
-Terraform сгенерирует `values_sentry.yaml` из шаблона `values_sentry.yaml.tpl`.
-
-**Порядок:** сначала ClickHouse (§1), затем Sentry.
-
-Установка Sentry:
-
-```bash
-helm repo add sentry https://sentry-kubernetes.github.io/charts
-helm repo update
-kubectl create namespace sentry
-helm upgrade --install sentry sentry/sentry --version 31.5.0 -n sentry \
-  -f values_sentry.yaml --timeout=7200s --create-namespace
-```
-
-Первый запуск занимает 20–40 минут.
-
-После установки Sentry доступен по адресу: **http://sentry.apatsev.org.ru**
-
 ### 3. Доступ к Sentry
 
 - **URL**: http://sentry.apatsev.org.ru
@@ -123,3 +103,46 @@ helm upgrade --install sentry sentry/sentry --version 31.5.0 -n sentry \
 ```bash
 kubectl -n ingress-nginx get svc
 ```
+
+
+
+## Тестирование issue #2166
+
+Issue [#2166](https://github.com/sentry-kubernetes/charts/issues/2166): после обновления Sentry Helm chart с `30.4.0` на `31.2.0` появляется ошибка **"The organization you were looking for was not found"**.
+
+### Воспроизведение
+
+Кластер уже развёрнут через Terraform (см. «Применение через Terraform» выше). Установка и upgrade выполняются вручную:
+
+```bash
+# Установка 30.4.0
+helm upgrade --install sentry sentry/sentry --version 30.4.0 -n sentry --wait \
+  -f values_sentry-30.4.0.yaml --timeout=7200s --create-namespace
+
+# Дождитесь готовности (30-40 мин), затем upgrade до 31.2.0
+helm upgrade sentry sentry/sentry --version 31.2.0 -n sentry --wait \
+  -f values_sentry-31.2.0.yaml --timeout=7200s
+```
+
+### Диагностика
+
+```bash
+# Проверка организации через Sentry CLI
+kubectl exec -n sentry deploy/sentry-web -- sentry organizations list
+kubectl exec -n sentry deploy/sentry-web -- sentry users list
+
+# Проверка hook-джобов на ошибки
+kubectl get jobs -n sentry
+kubectl logs -n sentry job/sentry-db-init
+kubectl logs -n sentry job/sentry-snuba-migrate
+kubectl logs -n sentry job/sentry-user-create
+
+# Поиск ошибки в логах web-пода
+kubectl logs -n sentry deploy/sentry-web --tail=100 | grep -i "organization.*not found"
+```
+
+### Известные причины issue #2166
+
+1. **Breaking change в 31.0.0**: пароль администратора больше не имеет значения по умолчанию (`aaaa` → `""`). Если `user.password` не задан, user-create hook падает с ошибкой.
+2. **Snuba migration issue**: в версиях 30.4.0 и 31.0.0 есть известная проблема с миграциями Snuba (см. [getsentry/self-hosted#4286](https://github.com/getsentry/self-hosted/issues/4286)).
+3. **Изменение memcached dependency**: условие подключения memcached изменилось с `sourcemaps.enabled` на `cache.enabled,sourcemaps.enabled`.

@@ -1,0 +1,11 @@
+configs:
+  files:
+    config.yaml:
+      watch:
+        namespaces:
+          - clickhouse
+          - sentry
+      reconcile:
+        coordination:
+          keeper:
+            onKeeperResourceUpdate: reconcile
