@@ -54,6 +54,7 @@ helm upgrade --install clickhouse-operator clickhouse-operator/altinity-clickhou
   --version 0.27.0 \
   --namespace clickhouse-operator \
   --create-namespace \
+  -f clickhouse-operator-values.yaml \
   --wait
 ```
 
