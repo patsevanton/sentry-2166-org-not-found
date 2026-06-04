@@ -20,7 +20,6 @@ export YC_FOLDER_ID="<ваш-folder-id>"
 
 ```hcl
 folder_id = "<ваш-folder-id>"
-domain    = "example.com"
 ```
 
 Применение:
@@ -32,14 +31,14 @@ terraform apply
 
 После успешного применения будут созданы:
 - VPC и подсеть в зоне `ru-central1-a`
-- Публичный IP и DNS-запись `sentry.<domain>`
+- Публичный IP и DNS-запись `sentry.apatsev.org.ru`
 - Кластер Managed Kubernetes (1 master, 1 node group с автоскейлингом 1–3)
 - Ingress-nginx с закреплённым публичным IP
 
 Получите credentials для kubectl:
 
 ```bash
-$(terraform output -raw k8s_cluster_credentials)
+yc managed-kubernetes cluster get-credentials --id id_cluster --external --force
 ```
 
 ### 1. ClickHouse (Altinity clickhouse-operator)
@@ -111,15 +110,15 @@ helm upgrade --install sentry sentry/sentry --version 31.5.0 -n sentry \
 
 Первый запуск занимает 20–40 минут.
 
-После установки Sentry доступен по адресу: **http://sentry.<domain>**
+После установки Sentry доступен по адресу: **http://sentry.apatsev.org.ru**
 
 ### 3. Доступ к Sentry
 
-- **URL**: http://sentry.<domain>
+- **URL**: http://sentry.apatsev.org.ru
 - **Email**: admin@sentry.local
 - **Password**: admin (задаётся в `templatefile.tf`, переменная `sentry_admin_password`)
 
-Убедитесь, что DNS-запись `sentry.<domain>` указывает на внешний IP сервиса ingress-nginx:
+Убедитесь, что DNS-запись `sentry.apatsev.org.ru` указывает на внешний IP сервиса ingress-nginx:
 
 ```bash
 kubectl -n ingress-nginx get svc
