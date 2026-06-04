@@ -102,12 +102,12 @@ Issue [#2166](https://github.com/sentry-kubernetes/charts/issues/2166): посл
 
 Кластер уже развёрнут через Terraform (см. «Применение через Terraform» выше). Установка и upgrade выполняются вручную:
 
-```bash
 # Установка 30.4.0
+```bash
 helm upgrade --install sentry sentry/sentry --version 30.4.0 -n sentry --wait \
-  -f values_sentry-30.4.0.yaml --timeout=7200s --create-namespace
+  -f values_sentry.yaml --timeout=7200s --create-namespace
 ```
-# Дождитесь готовности (30-40 мин), затем upgrade до 31.2.0
+# Дождитесь готовности (30-40 мин)
 
 ### Доступ к Sentry
 
@@ -123,7 +123,7 @@ kubectl -n ingress-nginx get svc
 
 ```bash
 helm upgrade до 31.2.0 sentry sentry/sentry --version 31.2.0 -n sentry --wait \
-  -f values_sentry-31.2.0.yaml --timeout=7200s
+  -f values_sentry.yaml --timeout=7200s
 ```
 
 ### Диагностика
