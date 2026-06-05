@@ -119,8 +119,8 @@ kubectl -n ingress-nginx get svc
 ```
 
 ```bash
-helm upgrade до 31.2.0 sentry sentry/sentry --version 31.2.0 -n sentry --wait \
-  -f values_sentry.yaml --timeout=7200s
+helm upgrade --install sentry sentry/sentry --version 31.2.0 -n sentry --wait \
+  -f values_sentry.yaml --timeout=7200s --create-namespace
 ```
 
 ### Диагностика
