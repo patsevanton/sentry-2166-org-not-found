@@ -1,49 +1,9 @@
-# Развёртывание Sentry в Yandex Cloud на Kubernetes
+## Тестирование issue #2166
 
-## Что разворачивается
+Issue [#2166](https://github.com/sentry-kubernetes/charts/issues/2166): после обновления Sentry Helm chart с `30.0.0` на `31.2.0` появляется ошибка **"The organization you were looking for was not found"**.
 
-- **Инфраструктура** через Terraform: VPC, Kubernetes Cluster, Ingress-контроллер, публичный IP, DNS.
-- **ClickHouse** через [Altinity clickhouse-operator](https://github.com/Altinity/clickhouse-operator) (1 shard × 3 replicas + ClickHouse Keeper).
-- **Sentry** через Helm-чарт `sentry/sentry` со встроенными PostgreSQL, Redis и Kafka (KRaft).
-
-## Применение через Terraform
-
-Подготовка:
-
-```bash
-export YC_TOKEN=$(yc iam create-token)
-export YC_CLOUD_ID=$(yc config get cloud-id)
-export YC_FOLDER_ID="<ваш-folder-id>"
-```
-
-Создайте `terraform.tfvars`:
-
-```hcl
-folder_id = "<ваш-folder-id>"
-```
-
-Применение:
-
-```bash
-terraform init
-terraform apply
-```
-
-После успешного применения будут созданы:
-- VPC и подсеть в зоне `ru-central1-a`
-- Публичный IP и DNS-запись `sentry.apatsev.org.ru`
-- Кластер Managed Kubernetes (1 master, 1 node group с автоскейлингом 1–3)
-- Ingress-nginx с закреплённым публичным IP
-
-Получите credentials для kubectl:
-
-```bash
-yc managed-kubernetes cluster get-credentials --id id_cluster --external --force
-```
 
 ### 1. ClickHouse (Altinity clickhouse-operator)
-
-ClickHouse для Sentry/Snuba развёрнут в Kubernetes через clickhouse-operator. Кластер: **1 shard × 3 replicas**, namespace `clickhouse`. Координация репликации через **ClickHouse Keeper** (3 узла).
 
 **1.1. Установка clickhouse-operator**
 
@@ -82,21 +42,6 @@ kubectl apply -f k8s/clickhouse/clickhouse-installation.yaml
 ```bash
 kubectl -n clickhouse get clickhouseinstallation sentry-clickhouse
 ```
-
-**1.4. Endpoint для Sentry**
-
-Кластер доступен из namespace `sentry` по адресу:
-- **TCP**: `clickhouse-sentry-clickhouse.clickhouse.svc.cluster.local:9000`
-- **HTTP**: `clickhouse-sentry-clickhouse.clickhouse.svc.cluster.local:8123`
-
-В `system.clusters` имя кластера — `sentry-cluster`. Эти значения уже заданы в `values_sentry.yaml.tpl`.
-
-> **Примечание:** Если вы используете другой DNS для ClickHouse или другой namespace, отредактируйте `external_clickhouse` в `templatefile.tf` перед `terraform apply`.
-
-
-## Тестирование issue #2166
-
-Issue [#2166](https://github.com/sentry-kubernetes/charts/issues/2166): после обновления Sentry Helm chart с `30.0.0` на `31.2.0` появляется ошибка **"The organization you were looking for was not found"**.
 
 
 # Установка 30.0.0

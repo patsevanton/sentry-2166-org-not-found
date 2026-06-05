@@ -91,11 +91,12 @@ provider "helm" {
   }
 }
 
-resource "helm_release" "ingress_nginx" {
-  name             = "ingress-nginx"
-  chart            = "oci://cr.yandex/yc-marketplace/yandex-cloud/ingress-nginx/chart/ingress-nginx"
-  version          = "4.13.0"
-  namespace        = "ingress-nginx"
+resource "helm_release" "traefik" {
+  name             = "traefik"
+  chart            = "traefik"
+  repository       = "https://traefik.github.io/charts"
+  version          = "34.2.0"
+  namespace        = "traefik"
   create_namespace = true
 
   depends_on = [
@@ -105,8 +106,9 @@ resource "helm_release" "ingress_nginx" {
 
   values = [
     yamlencode({
-      controller = {
-        service = {
+      service = {
+        type = "LoadBalancer"
+        spec = {
           loadBalancerIP = local.ingress_ip
         }
       }

@@ -20,7 +20,7 @@ locals {
     system_url            = "http://sentry.apatsev.org.ru"
     ingress_enabled       = true
     ingress_hostname      = "sentry.apatsev.org.ru"
-    ingress_class_name    = "nginx"
+    ingress_class_name    = "traefik"
     external_clickhouse   = local.external_clickhouse
   })
 }
